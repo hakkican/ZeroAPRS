@@ -4,7 +4,7 @@
   "description": "ZoroAPRS is a simple APRS library with DAC for samd21 based arduino boards.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hakkican/ZeroAPRS/ZeroAPRS.git"
+    "url": "https://github.com/hakkican/ZeroAPRS.git"
   },
   "authors": [
     {
