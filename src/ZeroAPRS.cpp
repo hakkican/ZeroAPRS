@@ -223,11 +223,11 @@ void APRS_PrepeareLoc(char *comment) {
   }
   APRS.TRACK[pos++] = 0x03;
   APRS.TRACK[pos++] = 0xf0;
-  APRS.TRACK[pos++] = '/';
   if (APRS.TIMESTAMP[0] != '\0') {
+	APRS.TRACK[pos++] = '/';  
     sprintf(APRS.TRACK + pos, "%s", APRS.TIMESTAMP);
     pos += 7;
-  }
+  }else APRS.TRACK[pos++] = '!';
   sprintf(APRS.TRACK + pos, "%s", APRS.LAT); pos += 8;
   APRS.TRACK[pos++] = APRS.SYMBOLTABLE;
   sprintf(APRS.TRACK + pos, "%s", APRS.LON); pos += 9;  
