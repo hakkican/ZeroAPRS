@@ -60,6 +60,7 @@ volatile int countPtr;
 unsigned char stuff, flag, fcsflag;
 unsigned short crc;
 bool state = 0;
+uint8_t gain = 4;
 
 const static uint8_t sinusTable[512] PROGMEM = {128, 129, 131, 132, 134, 135, 137, 138, 140, 141, 143, 145, 146, 148, 149, 151, 152, 154, 155, 157,
                                                 158, 160, 161, 163, 164, 166, 167, 169, 170, 172, 173, 175, 176, 178, 179, 180, 182, 183, 185, 186,
@@ -86,11 +87,19 @@ const static uint8_t sinusTable[512] PROGMEM = {128, 129, 131, 132, 134, 135, 13
                                                 103, 104, 106, 107, 109, 110, 112, 114, 115, 117, 118, 120, 121, 123, 124, 126};
 
 void APRS_init() {
-  analogWriteResolution(8);
-  analogWrite(A0, 255);  
+  while (DAC->STATUS.bit.SYNCBUSY);
+  DAC->DATA.reg = 0; //DAC out 0
+  while (DAC->STATUS.bit.SYNCBUSY);
+  DAC->CTRLA.bit.ENABLE = 0x01; //DAC Enable
   APRS_tcConfigure(13200);
   sinusPtr = 0;
   countPtr = 0;
+}
+
+void APRS_setGain(uint8_t s) {
+    if (s > 0 && s < 5) {//1-4
+        gain = s;
+    }
 }
 
 void APRS_setCallsign(char *call, uint8_t ssid) {
@@ -285,7 +294,7 @@ void APRS_sinus()
   ddsAccu = ddsAccu + ddsWord;
   sinusPtr = ddsAccu >> 23;
   while (DAC->STATUS.reg & DAC_STATUS_SYNCBUSY);
-  DAC->DATA.reg = pgm_read_byte(&(sinusTable[sinusPtr]));
+  DAC->DATA.reg = pgm_read_byte(&(sinusTable[sinusPtr]))*gain;
   countPtr++;
 }
 
@@ -349,7 +358,7 @@ void APRS_sendpacket()
   fcsflag = 0;
   flag = 1;
   for (i = 0; i < tailFlag; i++) APRS_sendbyte(0x7E);	  //Sends 30 flag bytes  
-  analogWrite(A0, 255);
+  analogWrite(A0, 0);
   APRS_tcDisable();
 }
 /********************************************************
