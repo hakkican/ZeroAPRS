@@ -36,6 +36,7 @@ void APRS_setPathSize(uint8_t pathSize);
 void APRS_setTimeStamp(uint8_t hh, uint8_t mm,uint8_t ss);
 void APRS_setLat(char *lat);
 void APRS_setLon(char *lon);
+void APRS_setGain(uint8_t s);
 void APRS_useAlternateSymbolTable(bool use);
 void APRS_setSymbol(char sym);
 void APRS_PrepeareCallsign();
