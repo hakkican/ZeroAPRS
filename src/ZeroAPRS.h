@@ -58,3 +58,4 @@ void APRS_tcStartCounter(void);
 void APRS_tcReset(void);
 void APRS_tcDisable(void);
 void TC5_Handler (void);
+char* APRS_getTrack();
