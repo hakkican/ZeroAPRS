@@ -2,7 +2,7 @@
  * ZoroAPRS is a simple aprs library with DAC for samd21 based arduino boards.
  * The ZoroAPRS library was developed only for LightAPRS hardware.
  * 
- * Copyright (C) 2019 HAKKI CAN (TA2NHP) <hkkcan@gmail.com> www.hakkican.com
+ * Copyright (C) 2024 HAKKI CAN (TA2NHP) <hkkcan@gmail.com> www.hakkican.com
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,8 +137,13 @@ void APRS_setPathSize(uint8_t pathSize) {
 
 void APRS_setTimeStamp(uint8_t hh, uint8_t mm, uint8_t ss) {
   memset(APRS.TIMESTAMP, 0, 7);
-  sprintf(APRS.TIMESTAMP, "%02d%02d%02d", hh, mm, ss);
-  APRS.TIMESTAMP[6] = 'h';
+  if(hh == 99 && mm == 99 && ss == 99) {
+	  APRS.TIMESTAMP[0] = '\0';
+  }
+  else {
+	  sprintf(APRS.TIMESTAMP, "%02d%02d%02d", hh, mm, ss);
+  	  APRS.TIMESTAMP[6] = 'h';
+  }
 }
 
 void APRS_setLat(char *lat) {
@@ -413,4 +418,9 @@ void APRS_tcDisable()
 {
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
   while (APRS_tcIsSyncing());
+}
+
+char* APRS_getTrack()
+{
+	return APRS.TRACK;
 }
