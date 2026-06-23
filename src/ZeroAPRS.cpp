@@ -2,7 +2,7 @@
  * ZoroAPRS is a simple aprs library with DAC for samd21 based arduino boards.
  * The ZoroAPRS library was developed only for LightAPRS hardware.
  * 
- * Copyright (C) 2019-2024 HAKKI CAN (TA2WX) <hkkcan@gmail.com> www.hakkican.com
+ * Copyright (C) 2019-2026 HAKKI CAN (TA2WX) www.hakkican.com
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,13 +137,8 @@ void APRS_setPathSize(uint8_t pathSize) {
 
 void APRS_setTimeStamp(uint8_t hh, uint8_t mm, uint8_t ss) {
   memset(APRS.TIMESTAMP, 0, 7);
-  if(hh == 99 && mm == 99 && ss == 99) {
-	  APRS.TIMESTAMP[0] = '\0';
-  }
-  else {
-	  sprintf(APRS.TIMESTAMP, "%02d%02d%02d", hh, mm, ss);
-  	  APRS.TIMESTAMP[6] = 'h';
-  }
+  sprintf(APRS.TIMESTAMP, "%02d%02d%02d", hh, mm, ss);
+  APRS.TIMESTAMP[6] = 'h';
 }
 
 void APRS_setLat(char *lat) {
@@ -285,6 +280,36 @@ void APRS_sendStatus(char *msg) {
   APRS_PrepeareStatus(msg);
   APRS_sendpacket();
 }
+
+void APRS_PrepeareMsg(char *msg){
+  uint8_t pos = 0;
+  memset(APRS.TRACK, 0, 200); 
+  APRS_PrepeareCallsign(); 
+  APRS_PrepearePath1();
+  APRS_PrepearePath2();
+  sprintf(APRS.TRACK + pos, "%s", APRS.DST); pos += 7;
+  sprintf(APRS.TRACK + pos, "%s", APRS.CALL); pos += 7;
+  if (APRS.PATH_SIZE > 0) {
+    sprintf(APRS.TRACK + pos, "%s", APRS.PATH1);
+    pos += 7;
+  }
+  if (APRS.PATH_SIZE > 1) {
+    sprintf(APRS.TRACK + pos, "%s", APRS.PATH2);
+    pos += 7;
+  }
+  APRS.TRACK[pos++] = 0x03;
+  APRS.TRACK[pos++] = 0xf0;
+  
+  // This is the critical change for APRS Messages
+  APRS.TRACK[pos++] = ':'; 
+  
+  sprintf(APRS.TRACK + pos, "%s", msg);
+}
+
+void APRS_sendMsg(char *msg) {
+  APRS_PrepeareMsg(msg);
+  APRS_sendpacket();
+}
 /********************************************************
    FM modulation
  ********************************************************/
@@ -420,7 +445,33 @@ void APRS_tcDisable()
   while (APRS_tcIsSyncing());
 }
 
-char* APRS_getTrack()
-{
-	return APRS.TRACK;
+void APRS_PrepeareTelemetry(char *msg){
+  uint8_t pos = 0;
+  memset(APRS.TRACK, 0, 200); 
+  APRS_PrepeareCallsign(); 
+  APRS_PrepearePath1();
+  APRS_PrepearePath2();
+  sprintf(APRS.TRACK + pos, "%s", APRS.DST); pos += 7;
+  sprintf(APRS.TRACK + pos, "%s", APRS.CALL); pos += 7;
+  if (APRS.PATH_SIZE > 0) {
+    sprintf(APRS.TRACK + pos, "%s", APRS.PATH1);
+    pos += 7;
+  }
+  if (APRS.PATH_SIZE > 1) {
+    sprintf(APRS.TRACK + pos, "%s", APRS.PATH2);
+    pos += 7;
+  }
+  APRS.TRACK[pos++] = 0x03;
+  APRS.TRACK[pos++] = 0xf0;
+  
+  // Data type indicator for Telemetry
+  APRS.TRACK[pos++] = 'T'; 
+  APRS.TRACK[pos++] = '#'; 
+  
+  sprintf(APRS.TRACK + pos, "%s", msg);
+}
+
+void APRS_sendTelemetry(char *msg) {
+  APRS_PrepeareTelemetry(msg);
+  APRS_sendpacket();
 }
